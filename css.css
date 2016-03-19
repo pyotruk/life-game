@@ -29,3 +29,7 @@ label span {
 	display: inline-block;
 	width: 80px;
 }
+input[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}

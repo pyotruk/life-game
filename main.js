@@ -13,8 +13,12 @@ var Cell = function(x, y, el){
 	};
 	self.setState(false);
 
-	self.el.click(function(){
+	self.toggleState = function(){
 		self.setState(!self.state);
+	};
+
+	self.el.click(function(){
+		self.toggleState();
 	})
 };
 
@@ -22,16 +26,29 @@ var Cell = function(x, y, el){
 var Game = function() {
 	var self = this;
 
-	const size = 100;
+	var size = 100;
+	const maxSize = 100;
+
+	var fps = 10;
+	const maxFps = 20;
+
 	var grid = {};
 
 	var ui = {
 		frame: $('.game .frame'),
 		startBtn: $('.game .menu .start'),
-		resetBtn: $('.game .menu .reset')
+		resetBtn: $('.game .menu .reset'),
+		sizeInput: $('.game .menu input[name=size]'),
+		fpsInput: $('.game .menu input[name=fps]'),
+		disableInputs: function(disabled){
+			this.sizeInput.attr('disabled', disabled);
+			this.fpsInput.attr('disabled', disabled);
+		}
 	};
 
 	var interval = null;
+	var isDragMode = false;
+
 	var profiler = new Profiler();
 
 	var checkInitState = function(x, y) {
@@ -48,10 +65,15 @@ var Game = function() {
 		return x + '_' + y;
 	};
 
+	var clearGrid = function(){
+		ui.frame.empty();
+		grid = {};
+	};
+
 	var paintGrid = function() {
 		for (var y = 0; y < size; y++) {
 			for (var x = 0; x < size; x++) {	
-				var el = $('<div>');
+				var el = $('<div>').attr({'data-x': x, 'data-y': y});
 				var cell = new Cell(x, y, el);
 				grid[generateKey(x, y)] = cell;
 				ui.frame.append(el);
@@ -128,27 +150,75 @@ var Game = function() {
 			}
 		};
 
-		console.log('drawFrame() executed for ' + profiler.elapsed());
+		//console.log('drawFrame() executed for ' + profiler.elapsed());
 	};
 
 	self.init = function() {
 		paintGrid();
-		ui.startBtn.click(self.start);
-		ui.resetBtn.click(self.reset);
+
+		ui.startBtn.click(function(){
+			ui.disableInputs(true);
+			self.start();
+		});
+
+		ui.resetBtn.click(function(){
+			ui.disableInputs(false);
+			self.reset();
+		});
+
+		ui.frame.mousedown(function(){
+			isDragMode = true;
+
+		}).mouseup(function(){
+			isDragMode = false;
+
+		}).mousemove(function(e){
+			if(!isDragMode) return;
+
+			var el = $(e.target);
+			var cell = findCell(el.attr('data-x'), el.attr('data-y'));
+			if(cell) cell.toggleState();
+		});
+
+		ui.sizeInput.keyup(function(){
+			var newSize = parseInt(ui.sizeInput.val());
+			if(newSize > maxSize) newSize = maxSize;
+			if(newSize !== size) {
+				changeSize(newSize);
+			}		
+		});
+	};
+
+	var changeSize = function(newSize){
+		size = newSize;
+		var sizePx = (size * 10) + 'px';
+		clearGrid();
+		ui.frame.css({width: sizePx, height: sizePx})
+		paintGrid();
 	};
 
 	self.start = function() {
+		if(self.isStarted()) return;
+
+		fps = parseInt(ui.fpsInput.val());
+		if(fps > maxFps) fps = maxFps;
+
 		drawFrame();
-		interval = setInterval(drawFrame, 100);
+		interval = setInterval(drawFrame, Math.round(1000 / fps));
 	};
 
 	self.reset = function(){
 		clearInterval(interval);
+		interval = null;
 
 		for(var key in grid) {
 			var cell = grid[key];
 			cell.setState(false);
 		}
+	};
+
+	self.isStarted = function(){
+		return interval !== null;
 	};
 };
 
