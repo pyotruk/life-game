@@ -25,8 +25,13 @@ var Game = function() {
 	const size = 100;
 	var grid = {};
 
-	var container = $('#container');
+	var ui = {
+		frame: $('.game .frame'),
+		startBtn: $('.game .menu .start'),
+		resetBtn: $('.game .menu .reset')
+	};
 
+	var interval = null;
 	var profiler = new Profiler();
 
 	var checkInitState = function(x, y) {
@@ -49,7 +54,7 @@ var Game = function() {
 				var el = $('<div>');
 				var cell = new Cell(x, y, el);
 				grid[generateKey(x, y)] = cell;
-				container.append(el);
+				ui.frame.append(el);
 			}
 		};
 	};
@@ -114,7 +119,7 @@ var Game = function() {
 		}
 	};
 
-	var drawFrame = function(){
+	var drawFrame = function() {
 		profiler.start();
 
 		for (var y = 0; y < size; y++) {
@@ -128,13 +133,23 @@ var Game = function() {
 
 	self.init = function() {
 		paintGrid();
+		ui.startBtn.click(self.start);
+		ui.resetBtn.click(self.reset);
 	};
 
 	self.start = function() {
 		drawFrame();
-		setInterval(drawFrame, 100);
+		interval = setInterval(drawFrame, 100);
 	};
 
+	self.reset = function(){
+		clearInterval(interval);
+
+		for(var key in grid) {
+			var cell = grid[key];
+			cell.setState(false);
+		}
+	};
 };
 
 
@@ -142,6 +157,4 @@ var Game = function() {
 $(function() {
 	var game = new Game();
 	game.init();
-
-	$('#start').click(game.start);
 });

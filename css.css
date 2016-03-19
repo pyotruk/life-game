@@ -1,10 +1,31 @@
-#container {
+body {
+	background-color: #333;
+}
+.game {
+	overflow: hidden;
+}
+.game .frame {
 	width: 1000px;
 	height: 1000px;
 	border: 1px solid gray;
+	display: inline-block;
 }
-#container > div {
+.game .frame > div {
 	width: 10px;
 	height: 10px;
 	display: inline-block;
+}
+.game .menu {
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 1em;
+}
+label {
+	display: block;
+	color: white;
+	margin-bottom: 0.5em;
+}
+label span {
+	display: inline-block;
+	width: 80px;
 }
