@@ -1,5 +1,7 @@
 body {
 	background-color: #333;
+	margin: 0;
+	font-family: Verdana, sans-serif;
 }
 .game {
 	overflow: hidden;
@@ -18,7 +20,8 @@ body {
 .game .menu {
 	display: inline-block;
 	vertical-align: top;
-	margin: 0 1em;
+	margin: 1em;
+	max-width: 250px;
 }
 label {
 	display: block;
@@ -32,4 +35,8 @@ label span {
 input[disabled] {
 	opacity: 0.5;
 	cursor: not-allowed;
+}
+label p {
+	margin-top: 2em;
+	font-size: .75em;
 }
